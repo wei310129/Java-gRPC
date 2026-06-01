@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+// 生成的 Java class 會放在這個 package 下
+option java_package = "com.example.javagrpc.grpc";
+// 把所有 class 放進同一個 Java 檔（比較簡潔）
+option java_multiple_files = true;
+
+// 定義資料結構（相當於 REST 的 Request Body DTO）
+message HelloRequest {
+  string name = 1;  // 1 是欄位編號（protobuf 用編號而非欄位名稱做序列化）
+}
+
+// 定義回應資料結構
+message HelloResponse {
+  string message = 1;
+}
+
+// 定義 gRPC service（相當於 REST 的 Controller）
+service HelloService {
+  // Unary RPC：一個 request → 一個 response（最基本的模式）
+  rpc SayHello (HelloRequest) returns (HelloResponse);
+}
