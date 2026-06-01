@@ -1,3 +1,11 @@
 spring:
   application:
     name: Java-gRPC
+
+grpc:
+  server:
+    port: 9090
+  client:
+    hello-service-9091:
+      address: static://localhost:9091
+      negotiation-type: plaintext

@@ -22,4 +22,7 @@ service HelloService {
 
   // Server Streaming RPC：一個 request → 多個 response（server 持續推送）
   rpc SayHelloStream (HelloRequest) returns (stream HelloResponse);
+
+  // Forward RPC：轉發給另一個 gRPC server（9091）
+  rpc ForwardSayHello (HelloRequest) returns (HelloResponse);
 }
