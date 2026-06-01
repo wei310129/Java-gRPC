@@ -19,4 +19,7 @@ message HelloResponse {
 service HelloService {
   // Unary RPC：一個 request → 一個 response（最基本的模式）
   rpc SayHello (HelloRequest) returns (HelloResponse);
+
+  // Server Streaming RPC：一個 request → 多個 response（server 持續推送）
+  rpc SayHelloStream (HelloRequest) returns (stream HelloResponse);
 }

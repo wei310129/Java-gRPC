@@ -17,4 +17,15 @@ public class HelloServiceImpl extends HelloServiceGrpc.HelloServiceImplBase {
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void sayHelloStream(HelloRequest request, StreamObserver<HelloResponse> responseObserver) {
+        for (int i = 1; i <= 5; i++) {
+            HelloResponse response = HelloResponse.newBuilder()
+                    .setMessage("Hello, " + request.getName() + " [" + i + "/5]")
+                    .build();
+            responseObserver.onNext(response);
+        }
+        responseObserver.onCompleted();
+    }
 }
