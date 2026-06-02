@@ -3,6 +3,8 @@ package com.example.javagrpc;
 import com.example.javagrpc.grpc.HelloRequest;
 import com.example.javagrpc.grpc.HelloResponse;
 import com.example.javagrpc.grpc.HelloServiceGrpc;
+import com.example.javagrpc.exception.HelloBadRequestException;
+import com.example.javagrpc.exception.HelloNotFoundException;
 import io.grpc.Context;
 import io.grpc.Deadline;
 import io.grpc.Status;
@@ -24,6 +26,12 @@ public class HelloServiceImpl extends HelloServiceGrpc.HelloServiceImplBase {
     @Override
     public void sayHello(HelloRequest request, StreamObserver<HelloResponse> responseObserver) {
         log.info("sayHello");
+        if (request.getName().isBlank()) {
+            throw new HelloBadRequestException("name must not be blank");
+        }
+        if (request.getName().equalsIgnoreCase("unknown")) {
+            throw new HelloNotFoundException(request.getName());
+        }
         HelloResponse response = HelloResponse.newBuilder()
                 .setMessage("Hello, " + request.getName())
                 .build();
