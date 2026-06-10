@@ -67,6 +67,21 @@ public final class NettyPacketParser {
         // 5) wrappedBuffer 是 zero-copy：不複製 byte[]，直接包成 ByteBuf。
         ByteBuf buf = Unpooled.wrappedBuffer(raw);
 
+        return parsePacket(buf);
+    }
+
+    /**
+     * 從 {@link ByteBuf} 解析封包欄位（核心邏輯）。
+     *
+     * <p>呼叫端須自行確保 buf 的生命週期（release/reference count），本方法只會讀取資料，
+     * 不會釋放 buf。常見用法：
+     * <ul>
+     *   <li>{@link #parseHexPacket(String)}：由 hex 字串包出 buf 後呼叫本方法。</li>
+     *   <li>Netty TCP server：{@code LengthFieldBasedFrameDecoder} 切出完整 frame 後，
+     *       直接把 frame 傳入本方法。</li>
+     * </ul>
+     */
+    public static ParsedPacket parsePacket(ByteBuf buf) {
         // readableBytes = writerIndex - readerIndex。
         // 讀 header 前先確認至少有 5 bytes，避免 readUnsigned... 直接越界。
         if (buf.readableBytes() < HEADER_SIZE) {
