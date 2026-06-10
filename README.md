@@ -83,6 +83,21 @@ client ──ForwardSayHello(name)──▶ server:9090 ──SayHello(name)─�
 
 `catch (StatusRuntimeException e)` 的 `onError(e)` 直接傳原始 exception，可保留下游回傳的 trailers（錯誤細節 metadata），完整轉發給最終 caller。
 
+### 6. HTTP API（非 gRPC）— `POST /api/packets/parse`
+
+除了 gRPC，也提供 REST API 來做 Netty `ByteBuf` 封包解析練習。
+
+封包格式（big-endian）：
+
+```
+| magic(2 bytes) | version(1 byte) | bodyLength(2 bytes) | body(N bytes, UTF-8) |
+```
+
+實作重點：
+- `readableBytes()`：讀取前先確認資料長度
+- `markReaderIndex()/resetReaderIndex()`：封包不足時回滾讀取位置
+- `readUnsignedShort()/readUnsignedByte()`：避免 signed 型別造成負值誤判
+
 ---
 
 ## 啟動方式
@@ -133,6 +148,14 @@ grpcurl -plaintext -d '{"name":""}' localhost:9090 HelloService/SayHello
 grpcurl -plaintext -d '{"name":"unknown"}' localhost:9090 HelloService/SayHello
 ```
 
+HTTP API 測試（非 gRPC）：
+
+```bash
+curl -X POST http://localhost:8080/api/packets/parse -H "Content-Type: application/json" -d '{"hexPacket":"CA FE 01 00 05 68 65 6C 6C 6F"}'
+
+curl -X POST http://localhost:8080/api/packets/parse -H "Content-Type: application/json" -d '{"hexPacket":"CAFE0100056869"}'
+```
+
 ---
 
 ## 專案結構重點
@@ -140,6 +163,8 @@ grpcurl -plaintext -d '{"name":"unknown"}' localhost:9090 HelloService/SayHello
 ```
 src/main/proto/hello.proto          # Proto 定義（service + message）
 src/main/java/.../HelloServiceImpl  # 三個 RPC 實作
+src/main/java/.../NettyPacketParser # ByteBuf 封包解析核心
+src/main/java/.../api/PacketParseController # 非 gRPC HTTP API
 src/main/java/.../GlobalGrpcExceptionHandler  # @GrpcAdvice 集中例外處理
 src/main/java/.../exception/        # 業務 Exception 定義
 src/main/resources/application.yaml           # 主設定（port 9090）
