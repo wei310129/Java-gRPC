@@ -94,6 +94,12 @@
             <artifactId>netty-codec</artifactId>
         </dependency>
 
+        <!-- IdleStateHandler 心跳逾時偵測練習 -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler</artifactId>
+        </dependency>
+
         <!-- Java 21 已移除 Javax 包，但由於 gRPC 不是官方包導致銜接不上需要自己手動加依賴 -->
         <dependency>
             <groupId>javax.annotation</groupId>
