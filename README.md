@@ -2,6 +2,17 @@
 
 用 Spring Boot 實作 gRPC server/client，並以 Netty 練習二進位封包解析、黏包／半包處理、讀取閒置逾時與群組廣播。此專案用來驗證通訊流程及底層網路處理的核心概念。
 
+## 工程重點與驗證入口
+
+| 問題 | 實作取捨 | 可查證入口 |
+| --- | --- | --- |
+| RPC 呼叫鏈無限制等待 | 向下游傳播 Deadline；上游未指定時補 3 秒期限，耗時運算另需配合取消檢查 | 下方跨 server 轉發與 Deadline 範例 |
+| TCP 是位元組串流，沒有應用封包邊界 | 長度欄位解碼與 decoder／encoder pipeline 處理黏包及半包；ByteBuf parser 檢查剩餘長度並在資料不足時回滾 reader index | FrameDecoderDemo 與封包解析章節 |
+| 連線與群組需要生命周期管理 | IdleStateHandler 觀察讀取閒置，ChannelGroup 示範廣播、room 篩選與關閉移除 | 三個 EmbeddedChannel Demo |
+| 示範結果不等於正式網路驗證 | Demo 可重現 pipeline 行為；Controller 單元測試與 context 測試的邊界另外列出 | 自動化測試與目前限制 |
+
+此 PoC 展示通訊契約、失敗邊界與網路處理流程；尚未提供正式 TCP server、TLS 或完整端到端驗收。
+
 ## 專案範圍
 
 | 範例 | 實作內容 | 執行入口 |
@@ -265,3 +276,4 @@ src/main/resources/application-server2.yaml  # 第二 server profile（port 9091
 
 - **`grpc-bom` in `<dependencyManagement>`**：統一 gRPC runtime 與 `protoc-gen-grpc-java` 使用的版本至 1.75.0，避免傳遞依賴的版本差異。
 - **`javax.annotation-api`**：生成的 stub 使用 `@javax.annotation.Generated`，因此顯式加入對應 annotation dependency。
+
